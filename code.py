@@ -6,6 +6,9 @@ import air_quality
 import wifi
 import socketpool
 import os
+import co2monitor
+
+co2monitor = co2monitor.co2monitor()
 
 latitude = "47.409008755184594"
 longitude = "8.549467354287557"
@@ -18,4 +21,6 @@ print("Connected to WiFi")
 data = air_quality.get_air_quality(pool, latitude, longitude)
 print(data)
 while True:
-    pass
+    if co2monitor.dataReady():
+        print(co2monitor.co2Rate())
+
