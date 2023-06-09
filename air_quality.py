@@ -11,6 +11,7 @@ def get_air_quality(pool,lat,lng):
 
     if response.status_code == 200:
         data = response.json()
+        response.close()
         return data
     else:
         print('Request failed:', response.status_code)
