@@ -32,8 +32,9 @@ oaqWarning = 150
 co2Good = 1000
 co2Stop = 500
 co2Warning = 1500
-co2RateStop = -0.2
-co2RateStart = -1.0
+co2RateStop = 0.2
+co2RateStart = 1.0
+co2RateFast = 2.0
 stopTime = 0
 graceTime = 10
 
@@ -71,7 +72,7 @@ while True:
             leds.setPixel(ledCallToAction1, leds.GREEN)
             leds.setPixel(ledCallToAction2, leds.GREEN)
         
-        elif co2monitor.co2Rate() > co2RateStop: # stop airing, because not efficient. negative rate!
+        elif co2monitor.co2Rate() > -co2RateStop: # stop airing, because not efficient. negative rate!
             stateAiring = False
             print("Stopped airing, rate too low")
             stopTime = time.monotonic()
@@ -93,11 +94,22 @@ while True:
             leds.setPixel(ledCallToAction1, leds.BLUE)
             leds.setPixel(ledCallToAction2, leds.BLUE)
 
+        
+        if (co2monitor.co2Rate() < -co2RateFast):
+            # set rate Led to GREEN, fast improving
+            leds.setPixel(ledAiringV, leds.GREEN)
+        elif(co2monitor.co2Rate() < 0):
+            # set rate Led to YELLOW, not really improving
+            leds.setPixel(ledAiringV, leds.YELLOW)
+        else:
+            # set rate Led to RED, even worsening
+            leds.setPixel(ledAiringV, leds.RED)
+
     else: # not airing
 
         if co2monitor.co2() > co2Good:
 
-            if co2monitor.co2Rate() < co2RateStart: # negative rate!
+            if co2monitor.co2Rate() < -co2RateStart: # negative rate!
                 stateAiring = True
                 print("Open window detected, rate=",co2monitor.co2Rate())
                 # set lüften led to CALL-TO-ACTION
@@ -115,6 +127,18 @@ while True:
                 # set lüften led to OFF
                 leds.setPixel(ledCallToAction1, leds.BLACK)
                 leds.setPixel(ledCallToAction2, leds.BLACK)
+
+
+        if (co2monitor.co2Rate() < -co2RateStart):
+            # set rate Led to GREEN, fast improving
+            leds.setPixel(ledAiringV, leds.GREEN)
+        elif(co2monitor.co2Rate() > co2RateStart):
+            # set rate Led to RED, fast decreasing
+            leds.setPixel(ledAiringV, leds.RED)
+        else:
+            # set rate Led to BLACK
+            leds.setPixel(ledAiringV, leds.BLACK)
+
 
 
     if co2monitor.co2() < co2Good:
@@ -147,8 +171,10 @@ while True:
         # set deltaTemp Led to BLUE, outside is cold
         leds.setPixel(ledDeltaTemp, leds.BLUE)
     elif (co2monitor.temperature() < temperature_outside - graceTemperature):
+        # set deltaTemp Led to RED, outside is hot
         leds.setPixel(ledDeltaTemp, leds.RED)
     else:
+        # set deltaTemp Led to GREEN, +/-same
         leds.setPixel(ledDeltaTemp, leds.GREEN)
 
 
