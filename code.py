@@ -25,7 +25,7 @@ latitude = "47.409008755184594"
 longitude = "8.549467354287557"
 
 externalDataProvider = DataProvider()
-air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
+air_quality_data = 0
 last_external_value_update_time = time.monotonic()
 
 oaqGood = 50
