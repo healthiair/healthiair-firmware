@@ -29,7 +29,7 @@ while True:
     if time.monotonic() - last_external_value_update_time >= 20:
         air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
         print(air_quality_data)
-        forecast_data = externalDataProvider.get_weather_forcast(latitude, longitude)
+        forecast_data = externalDataProvider.get_current_temperature(latitude, longitude)
         print(forecast_data)
         last_run_time = time.monotonic()
 

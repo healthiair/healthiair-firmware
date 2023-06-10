@@ -15,7 +15,7 @@ class DataProvider:
         except:
             self._wifi_connected = False
 
-    def get_weather_forcast(self, lat, lng):
+    def get_current_temperature(self, lat, lng):
         if not self._wifi_connected:
             return
 
@@ -27,7 +27,7 @@ class DataProvider:
         if response.status_code == 200:
             data = response.json()
             response.close()
-            return data
+            return data['current_weather']['temperature']
         else:
             print('Request failed:', response.status_code)
 
