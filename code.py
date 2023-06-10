@@ -58,6 +58,9 @@ while True:
             temperature_outside = co2monitor.temperature()
         print("Outside temperature: ", temperature_outside)
         last_external_value_update_time = time.monotonic()
+    elif not externalDataProvider.ready():
+        new_temperature_outside = co2monitor.temperature()
+
 
     co2monitor.update()
     print("CO2:", co2monitor.co2(),", rate:",co2monitor.co2Rate(), ", state:",stateAiring)
