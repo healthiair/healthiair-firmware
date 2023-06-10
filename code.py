@@ -25,7 +25,8 @@ latitude = "47.409008755184594"
 longitude = "8.549467354287557"
 
 externalDataProvider = DataProvider()
-air_quality_data = 0
+air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
+temperature_outside = externalDataProvider.get_current_temperature(latitude, longitude)
 last_external_value_update_time = time.monotonic()
 
 oaqGood = 50
@@ -39,13 +40,15 @@ co2RateStart = -1.0
 stopTime = 0
 graceTime = 10
 
+graceTemperature = 5
+
 while True:
 
     if time.monotonic() - last_external_value_update_time >= 20:
         air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
         print(air_quality_data)
-        forecast_data = externalDataProvider.get_current_temperature(latitude, longitude)
-        print(forecast_data)
+        temperature_outside = externalDataProvider.get_current_temperature(latitude, longitude)
+        print(temperature_outside)
         last_external_value_update_time = time.monotonic()
 
     co2monitor.update()
@@ -132,7 +135,15 @@ while True:
         # set OAQ Led to RED
         leds.setPixel(ledOAQ, leds.RED)
 
-    # set dTemp Led to fct(co2monitor.temp()?, outdoor_temp()?)
+
+    if (co2monitor.temperature() > temperature_outside + graceTemperature ):
+        # set deltaTemp Led to BLUE, outside is cold
+        leds.setPixel(ledDeltaTemp, leds.BLUE)
+    elif (co2monitor.temperature() < temperature_outside - graceTemperature):
+        leds.setPixel(ledDeltaTemp, leds.RED)
+    else:
+        leds.setPixel(ledDeltaTemp, leds.GREEN)
+
 
     leds.show()
     time.sleep(1)
