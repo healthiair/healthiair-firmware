@@ -26,10 +26,10 @@ class DataProvider:
 
         if response.status_code == 200:
             data = response.json()
-            response.close()
             return data['current_weather']['temperature']
         else:
             print('Request failed:', response.status_code)
+        response.close()
 
     def get_air_quality(self, lat, lng):
         if not self._wifi_connected:
@@ -42,7 +42,7 @@ class DataProvider:
 
         if response.status_code == 200:
             data = response.json()
-            response.close()
             return data['data']['aqi']
         else:
             print('Request failed:', response.status_code)
+        response.close()
