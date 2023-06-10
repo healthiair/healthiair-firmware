@@ -34,7 +34,7 @@ while True:
         print(air_quality_data)
         forecast_data = externalDataProvider.get_current_temperature(latitude, longitude)
         print(forecast_data)
-        last_run_time = time.monotonic()
+        last_external_value_update_time = time.monotonic()
 
     co2monitor.update()
 
