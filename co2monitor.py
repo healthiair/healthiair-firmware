@@ -19,20 +19,18 @@ class co2monitor:
             time.sleep(1)
 
         initValue = self.scd4x.CO2
+        self.temperatureReading = 0
         self.co2readings = [initValue for i in range(10)]
         self.co2averages = [initValue for i in range(2)]
         self.timeReadings = [j*4 for j in range(2)]
         self.startTime = time.monotonic()
         self.now = self.startTime
 
-
     def dataReady(self):
         return self.scd4x.data_ready
 
-
     def mean(self, list):
         return sum(list)/len(list)
-
 
     def update(self):
         if self.dataReady():
@@ -40,17 +38,21 @@ class co2monitor:
 
             # make measurement
             co2 = self.scd4x.CO2
+            self.temperatureReading = self.scd4x.temperature
             self.co2readings = self.co2readings[1:] + [co2]
             self.co2averages = self.co2averages[1:] + [self.mean(self.co2readings)]
 
             self.timeReadings = self.timeReadings[1:] + [now]
 
-            print("New CO2: ",self.co2())
+            print("New CO2: ", self.co2())
+            print("New temperature: ", self.temperature())
    
 
     def co2Rate(self):
         return (self.co2averages[-1] - self.co2averages[0])/(self.timeReadings[-1] - self.timeReadings[0])
 
-
     def co2(self):
         return self.co2averages[-1]
+
+    def temperature(self):
+        return self.temperatureReading
