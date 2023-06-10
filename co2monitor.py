@@ -35,17 +35,22 @@ class co2monitor:
 
 
     def update(self):
-        now = time.monotonic() - self.startTime
+        if self.dataReady():
+            now = time.monotonic() - self.startTime
 
-        # make measurement
-        co2 = self.scd4x.CO2
-        self.co2readings = self.co2readings[1:] + [co2]
-        self.co2averages = self.co2averages[1:] + [self.mean(self.co2readings)]
+            # make measurement
+            co2 = self.scd4x.CO2
+            self.co2readings = self.co2readings[1:] + [co2]
+            self.co2averages = self.co2averages[1:] + [self.mean(self.co2readings)]
 
-        self.timeReadings = self.timeReadings[1:] + [now]
+            self.timeReadings = self.timeReadings[1:] + [now]
+
+            print("New CO2: ",self.co2())
    
 
     def co2Rate(self):
-        self.update()
         return (self.co2averages[-1] - self.co2averages[0])/(self.timeReadings[-1] - self.timeReadings[0])
 
+
+    def co2(self):
+        return self.co2averages[-1]
