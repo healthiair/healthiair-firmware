@@ -2,14 +2,24 @@
 
 # Requires:
 #  lib/neopixel.mpy
+import board
 from externalDataProvider import DataProvider
 import os
 import co2monitor
 import time
+import batchLeds
 
 stateAiring = False
 
 co2monitor = co2monitor.co2monitor()
+
+leds = batchLeds.batchLeds(board.GP22, 6)
+ledIAQ = 0
+ledOAQ = 1
+ledDeltaTemp = 2
+ledAiringV = 3
+ledCallToAction1 = 4
+ledCallToAction2 = 5
 
 latitude = "47.409008755184594"
 longitude = "8.549467354287557"
@@ -43,18 +53,25 @@ while True:
         if co2monitor.co2() < co2Stop:
             stateAiring = False
             # set lüften led to DONE
+            leds.setPixel(ledCallToAction1, leds.BLACK)
+            leds.setPixel(ledCallToAction2, leds.BLACK)
         
         elif co2monitor.co2Rate() < co2RateStop: # stop airing, because not efficient
             stateAiring = False
             # set lüften led to DONE
+            leds.setPixel(ledCallToAction1, leds.BLACK)
+            leds.setPixel(ledCallToAction2, leds.BLACK)
 
         elif air_quality_data > oaqWarning: # do not air if OAQ unhealthy
             stateAiring = False
             # set lüften led to DONE
+            leds.setPixel(ledCallToAction1, leds.BLACK)
+            leds.setPixel(ledCallToAction2, leds.BLACK)
 
         else:
-            pass
             # set lüften led to IN-PROGRESS
+            leds.setPixel(ledCallToAction1, leds.GREEN)
+            leds.setPixel(ledCallToAction2, leds.GREEN)
 
     else: # not airing
 
@@ -63,40 +80,44 @@ while True:
             if co2monitor.co2Rate() > co2RateStart:
                 stateAiring = True
                 # set lüften led to CALL-TO-ACTION
+                leds.setPixel(ledCallToAction1, leds.RED)
+                leds.setPixel(ledCallToAction2, leds.RED)
 
             else:
-                pass
                 # set lüften led to IN-PROGRESS
+                leds.setPixel(ledCallToAction1, leds.BLUE)
+                leds.setPixel(ledCallToAction2, leds.BLUE)
 
         else:
-            pass
             # set lüften led to OFF
+            leds.setPixel(ledCallToAction1, leds.BLACK)
+            leds.setPixel(ledCallToAction2, leds.BLACK)
 
 
     if co2monitor.co2() < co2Good:
-        pass
         # set IAQ Led to GREEN
+        leds.setPixel(ledIAQ, leds.GREEN)
 
     elif co2monitor.co2() < co2Warning:
-        pass
         # set IAQ Led to YELLOW
+        leds.setPixel(ledIAQ, leds.YELLOW)
 
     else:
-        pass
         # set IAQ Led to RED
+        leds.setPixel(ledIAQ, leds.RED)
 
     
     if air_quality_data <= oaqGood:
-        pass
         # set OAQ Led to GREEN
+        leds.setPixel(ledOAQ, leds.GREEN)
 
     elif air_quality_data <= oaqWarning:
-        pass
         # set OAQ Led to YELLOW
+        leds.setPixel(ledOAQ, leds.YELLOW)
 
     else:
-        pass
         # set OAQ Led to RED
+        leds.setPixel(ledOAQ, leds.RED)
 
     
     # set dTemp Led to fct(co2monitor.temp()?, outdoor_temp()?)
