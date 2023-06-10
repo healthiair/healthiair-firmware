@@ -21,9 +21,6 @@ ledAiringV = 1
 ledCallToAction1 = 4
 ledCallToAction2 = 5
 
-latitude = "47.409008755184594"
-longitude = "8.549467354287557"
-
 externalDataProvider = DataProvider()
 air_quality_data = 0
 temperature_outside = 20
@@ -44,7 +41,7 @@ graceTemperature = 5
 
 while True:
     if time.monotonic() - last_external_value_update_time >= 20 and externalDataProvider.ready():
-        new_air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
+        new_air_quality_data = externalDataProvider.get_air_quality(os.getenv('LATITUDE'), os.getenv('LONGITUDE'))
         # set air quality to 0 if we do not have external data
         if new_air_quality_data:
             air_quality_data = new_air_quality_data
@@ -52,7 +49,7 @@ while True:
             air_quality_data = 0
         print("Air quality: ", air_quality_data)
 
-        new_temperature_outside = externalDataProvider.get_current_temperature(latitude, longitude)
+        new_temperature_outside = externalDataProvider.get_current_temperature(os.getenv('LATITUDE'), os.getenv('LONGITUDE'))
         # set outside temperature to the inside temperature if we do not have external data
         if new_temperature_outside:
             temperature_outside = new_temperature_outside
