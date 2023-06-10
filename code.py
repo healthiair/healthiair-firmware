@@ -15,9 +15,9 @@ co2monitor = co2monitor.co2monitor()
 
 leds = batchLeds.batchLeds(board.GP22, 6)
 ledIAQ = 0
-ledOAQ = 1
+ledOAQ = 3
 ledDeltaTemp = 2
-ledAiringV = 3
+ledAiringV = 1
 ledCallToAction1 = 4
 ledCallToAction2 = 5
 
@@ -36,6 +36,8 @@ co2Stop = 500
 co2Warning = 1500
 co2RateStop = -0.2
 co2RateStart = -1.0
+stopTime = 0
+graceTime = 10
 
 while True:
 
@@ -47,51 +49,62 @@ while True:
         last_external_value_update_time = time.monotonic()
 
     co2monitor.update()
+    print("CO2:", co2monitor.co2(),", rate:",co2monitor.co2Rate(), ", state:",stateAiring)
 
     if stateAiring:
         
         if co2monitor.co2() < co2Stop:
             stateAiring = False
+            print("Stopped airing, co2 ok")
+            stopTime = time.monotonic()
             # set lüften led to DONE
-            leds.setPixel(ledCallToAction1, leds.BLACK)
-            leds.setPixel(ledCallToAction2, leds.BLACK)
+            leds.setPixel(ledCallToAction1, leds.GREEN)
+            leds.setPixel(ledCallToAction2, leds.GREEN)
         
-        elif co2monitor.co2Rate() < co2RateStop: # stop airing, because not efficient
+        elif co2monitor.co2Rate() > co2RateStop: # stop airing, because not efficient. negative rate!
             stateAiring = False
+            print("Stopped airing, rate too low")
+            stopTime = time.monotonic()
             # set lüften led to DONE
-            leds.setPixel(ledCallToAction1, leds.BLACK)
-            leds.setPixel(ledCallToAction2, leds.BLACK)
+            leds.setPixel(ledCallToAction1, leds.GREEN)
+            leds.setPixel(ledCallToAction2, leds.GREEN)
 
         elif air_quality_data > oaqWarning: # do not air if OAQ unhealthy
             stateAiring = False
+            print("Stopped airing, bad OAQ")
+            stopTime = time.monotonic()
             # set lüften led to DONE
-            leds.setPixel(ledCallToAction1, leds.BLACK)
-            leds.setPixel(ledCallToAction2, leds.BLACK)
-
-        else:
-            # set lüften led to IN-PROGRESS
             leds.setPixel(ledCallToAction1, leds.GREEN)
             leds.setPixel(ledCallToAction2, leds.GREEN)
+
+        else:
+            print("Airing in progress")
+            # set lüften led to IN-PROGRESS
+            leds.setPixel(ledCallToAction1, leds.BLUE)
+            leds.setPixel(ledCallToAction2, leds.BLUE)
 
     else: # not airing
 
         if co2monitor.co2() > co2Good:
 
-            if co2monitor.co2Rate() > co2RateStart:
+            if co2monitor.co2Rate() < co2RateStart: # negative rate!
                 stateAiring = True
+                print("Open window detected, rate=",co2monitor.co2Rate())
                 # set lüften led to CALL-TO-ACTION
-                leds.setPixel(ledCallToAction1, leds.RED)
-                leds.setPixel(ledCallToAction2, leds.RED)
-
-            else:
-                # set lüften led to IN-PROGRESS
                 leds.setPixel(ledCallToAction1, leds.BLUE)
                 leds.setPixel(ledCallToAction2, leds.BLUE)
 
+            else:
+                print("Please open the windows!")
+                # set lüften led to IN-PROGRESS
+                leds.setPixel(ledCallToAction1, leds.RED)
+                leds.setPixel(ledCallToAction2, leds.RED)
+
         else:
-            # set lüften led to OFF
-            leds.setPixel(ledCallToAction1, leds.BLACK)
-            leds.setPixel(ledCallToAction2, leds.BLACK)
+            if (time.monotonic() - stopTime) > graceTime:
+                # set lüften led to OFF
+                leds.setPixel(ledCallToAction1, leds.BLACK)
+                leds.setPixel(ledCallToAction2, leds.BLACK)
 
 
     if co2monitor.co2() < co2Good:
@@ -119,5 +132,7 @@ while True:
         # set OAQ Led to RED
         leds.setPixel(ledOAQ, leds.RED)
 
-    
     # set dTemp Led to fct(co2monitor.temp()?, outdoor_temp()?)
+
+    leds.show()
+    time.sleep(1)
