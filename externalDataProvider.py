@@ -21,7 +21,7 @@ class DataProvider:
 
         requests = adafruit_requests.Session(self._pool, ssl.create_default_context())
 
-        url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng + '&hourly=temperature_2m,rain&forecast_days=1'
+        url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lng + '&hourly=temperature_2m,rain&current_weather=true&forecast_days=1'
         response = requests.get(url)
 
         if response.status_code == 200:
