@@ -46,3 +46,6 @@ class DataProvider:
         else:
             print('Request failed:', response.status_code)
         response.close()
+
+    def ready(self):
+        return self._wifi_connected

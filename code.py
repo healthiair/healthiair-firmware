@@ -25,9 +25,9 @@ latitude = "47.409008755184594"
 longitude = "8.549467354287557"
 
 externalDataProvider = DataProvider()
-air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
-temperature_outside = externalDataProvider.get_current_temperature(latitude, longitude)
-last_external_value_update_time = time.monotonic()
+air_quality_data = 0
+temperature_outside = 20
+last_external_value_update_time = 0
 
 oaqGood = 50
 oaqWarning = 150
@@ -43,12 +43,22 @@ graceTime = 10
 graceTemperature = 5
 
 while True:
+    if time.monotonic() - last_external_value_update_time >= 20 and externalDataProvider.ready():
+        new_air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
+        # set air quality to 0 if we do not have external data
+        if new_air_quality_data:
+            air_quality_data = new_air_quality_data
+        else:
+            air_quality_data = 0
+        print("Air quality: ", air_quality_data)
 
-    if time.monotonic() - last_external_value_update_time >= 20:
-        air_quality_data = externalDataProvider.get_air_quality(latitude, longitude)
-        print(air_quality_data)
-        temperature_outside = externalDataProvider.get_current_temperature(latitude, longitude)
-        print(temperature_outside)
+        new_temperature_outside = externalDataProvider.get_current_temperature(latitude, longitude)
+        # set outside temperature to the inside temperature if we do not have external data
+        if new_temperature_outside:
+            temperature_outside = new_temperature_outside
+        else:
+            temperature_outside = co2monitor.temperature()
+        print("Outside temperature: ", temperature_outside)
         last_external_value_update_time = time.monotonic()
 
     co2monitor.update()
