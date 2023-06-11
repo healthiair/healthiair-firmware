@@ -8,10 +8,17 @@ import os
 import co2monitor
 import time
 import batchLeds
+import touchio
 
 stateAiring = False
 
 co2monitor = co2monitor.co2monitor()
+
+# GP9, GP19, GP28 and GP14 connect to the touchpad (or a simple wire) and from there it needs
+# a 1M Ohm resistor to GND
+# see readme for needed extension to be made to the cover in order for this to work
+tp1 = touchio.TouchIn(board.GP9)
+tp2 = touchio.TouchIn(board.GP19)
 
 leds = batchLeds.batchLeds(board.GP22, 6)
 leds.fill(leds.BLACK)
@@ -24,6 +31,8 @@ ledDeltaTemp = 2
 ledAiringV = 1
 ledCallToAction1 = 4
 ledCallToAction2 = 5
+ledBrightness = 1
+ledBrightnessDelta = 0.1
 
 externalDataProvider = DataProvider()
 if externalDataProvider.ready():
@@ -190,6 +199,21 @@ while True:
     else:
         # set deltaTemp Led to GREEN, +/-same
         leds.setPixel(ledDeltaTemp, leds.GREEN)
+
+
+    # update UI brightness with touchbuttons
+    # do not touch on startup!
+    if (tp1.value):
+        ledBrightness += ledBrightnessDelta
+        if ledBrightness <= 0:
+            ledBrightness = ledBrightnessDelta
+        leds.updateBrightness(ledBrightness)
+
+    elif (tp2.value):
+        ledBrightness -= ledBrightnessDelta
+        if ledBrightness >= 1.0:
+            ledBrightness = 1.0 -ledBrightnessDelta
+        leds.updateBrightness(ledBrightness)
 
 
     leds.show()
