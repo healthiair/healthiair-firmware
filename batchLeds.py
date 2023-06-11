@@ -17,5 +17,9 @@ class batchLeds:
         self.pixels[num] = color
 
 
+    def fill(self, color):
+        self.pixels.fill(color)
+
+
     def show(self):
         self.pixels.show()

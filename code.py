@@ -14,6 +14,9 @@ stateAiring = False
 co2monitor = co2monitor.co2monitor()
 
 leds = batchLeds.batchLeds(board.GP22, 6)
+leds.fill(BLACK)
+leds.pixels[0] = YELLOW
+leds.show()
 ledIAQ = 0
 ledOAQ = 3
 ledDeltaTemp = 2
@@ -25,6 +28,11 @@ externalDataProvider = DataProvider()
 air_quality_data = 0
 temperature_outside = 20
 last_external_value_update_time = 0
+if externalDataProvider.ready():
+    leds.fill(GREEN)
+else:
+    leds.fill(RED)
+time.sleep(1)
 
 oaqGood = 50
 oaqWarning = 150
